@@ -140,7 +140,11 @@ while readline.lower() != "exit":
                 print("Unknown error making change. Did you set the inputs correctly? (Note if deconfiguring interfaces to 0, this is normal)")
                 print("Command Attempted:",command_set)
                 print()
-    else:
+    elif (readline.strip() == ""):
+        pass
+    elif (readline.strip() == "exit"):
+        pass
+    else:    
         print("Valid verbs: [show, set, help]")
         print("EXAMPLES")
         print()
