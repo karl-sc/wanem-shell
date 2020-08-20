@@ -106,40 +106,47 @@ while readline.lower() != "exit":
             jitter      = splitlines[4] + "ms"
             loss        = splitlines[5] + "%"
             
-            print("Attempting to change interface",site,interface) 
-            print("  Latency(ms) :",latency)
-            print("  Jitter(ms)  :",jitter)
-            print("  Loss(%)     :",loss)    
-
-            # Add NETEM in case the interface is unconfigured
-            command = "sudo tc qdisc add dev " + verbs[site][interface] + " root netem 2>&1"
-            output = os.popen(command).read().strip()
-
-            #set latency both add and change just in case its unconfigured
-            command_set = "sudo tc qdisc change dev " + verbs[site][interface] + " root netem delay " + latency + " " + jitter + " 25% " + " loss " + loss + " 25%"
-            output = os.popen(command_set).read().strip()
-
-            #Show changed output
-            command = "sudo tc qdisc show dev " + verbs[site][interface]
-            output = os.popen(command).read().strip()
-            outsplit = output.split()
-            if ('delay' in outsplit) and ('loss' in outsplit):
-                print("New interface config for",site,interface) 
-                latency = outsplit[outsplit.index("delay") + 1]
-                latency = latency.replace("ms","")
-                jitter = outsplit[outsplit.index("delay") + 2]
-                jitter = jitter.replace("ms","")
-                loss = outsplit[outsplit.index("loss") + 1]
-                loss = loss.replace("%","")
-                
-                print("  Latency(ms) :",latency + "ms")
-                print("  Jitter(ms)  :",jitter + "ms")
-                print("  Loss(%)     :",loss + "%") 
+            if (site not in verbs.keys()):
+                print("Error SITE not found!")
+                print()
+            elif (interface not in verbs[site].keys()):
+                print("Error INTERFACE not found at site!")
                 print()
             else:
-                print("Unknown error making change. Did you set the inputs correctly? (Note if deconfiguring interfaces to 0, this is normal)")
-                print("Command Attempted:",command_set)
-                print()
+                print("Attempting to change interface",site,interface) 
+                print("  Latency(ms) :",latency)
+                print("  Jitter(ms)  :",jitter)
+                print("  Loss(%)     :",loss)    
+
+                # Add NETEM in case the interface is unconfigured
+                command = "sudo tc qdisc add dev " + verbs[site][interface] + " root netem 2>&1"
+                output = os.popen(command).read().strip()
+
+                #set latency both add and change just in case its unconfigured
+                command_set = "sudo tc qdisc change dev " + verbs[site][interface] + " root netem delay " + latency + " " + jitter + " 25% " + " loss " + loss + " 25%"
+                output = os.popen(command_set).read().strip()
+
+                #Show changed output
+                command = "sudo tc qdisc show dev " + verbs[site][interface]
+                output = os.popen(command).read().strip()
+                outsplit = output.split()
+                if ('delay' in outsplit) and ('loss' in outsplit):
+                    print("New interface config for",site,interface) 
+                    latency = outsplit[outsplit.index("delay") + 1]
+                    latency = latency.replace("ms","")
+                    jitter = outsplit[outsplit.index("delay") + 2]
+                    jitter = jitter.replace("ms","")
+                    loss = outsplit[outsplit.index("loss") + 1]
+                    loss = loss.replace("%","")
+                    
+                    print("  Latency(ms) :",latency + "ms")
+                    print("  Jitter(ms)  :",jitter + "ms")
+                    print("  Loss(%)     :",loss + "%") 
+                    print()
+                else:
+                    print("Unknown error making change. Did you set the inputs correctly? (Note if deconfiguring interfaces to 0, this is normal)")
+                    print("Command Attempted:",command_set)
+                    print()
     elif (readline.strip() == ""):
         pass
     elif (readline.strip() == "exit"):
